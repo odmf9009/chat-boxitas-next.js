@@ -8,8 +8,20 @@
     "start": "next start"
   },
   "dependencies": {
+    "@bootstrap-styled/provider": "^2.0.2",
+    "@bootstrap-styled/v4": "^3.4.0",
+    "classlist.js": "^1.1.20150312",
     "next": "^9.3.3",
-    "react": "^16.13.0",
-    "react-dom": "^16.13.0"
-  }
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "reactstrap": "^8.5.1",
+    "socket.io-client": "^2.3.0",
+    "styled-components": "^5",
+    "username-generator": "^1.1.0"
+  },
+  "main": "index.js",
+  "repository": "https://github.com/odmf9009/chat-next.js.git",
+  "author": "orlando <orlando.mir@lucual18.es>",
+  "license": "MIT",
+  "devDependencies": {}
 }
