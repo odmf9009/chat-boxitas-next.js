@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import socketIOClient from "socket.io-client";
 import Chat from "./chat";
 import styled from "styled-components";
+import GlobalStyle from "../components/styled/GlobalStyle";
 const ENDPOINT = "http://127.0.0.1:4001";
 const socket = socketIOClient(ENDPOINT);
 
@@ -34,6 +35,7 @@ function App() {
     return (
 
             <div>
+                <GlobalStyle/>
                 {isLogged===false?<div><input style={{width: "300px", display: "inline"}} id="inputmsg"
                        value={user}
                        onChange={onChangeState}/>
@@ -41,7 +43,7 @@ function App() {
                     login()
                 }}> Entrar
                 </button></div>:null}
-                {isLogged===true ?<Chat user={loggedUser}/>:null}
+                {isLogged===true ?<div style={{ background:"#e5e5e5",width: "100%"}}><Chat user={loggedUser}/></div>:null}
             </div>
 
 
