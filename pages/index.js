@@ -12,7 +12,7 @@ function App() {
     const [name, setName] = useState("");
     const [isLogged, setIsLogged] = useState(false);
     const [loggedUser, setLoggedUser] = useState(null);
-    const [msg, setMsg] = useState("");
+    const [user, setUser] = useState("[]");
     const onSummit = e => {
         e.preventDefault();
         console.log("Nombre: "+name)
@@ -24,6 +24,11 @@ function App() {
             socket.on("connecteduser", data => {
                 console.log(JSON.parse(data));
                 setLoggedUser(JSON.parse(data));
+
+            });
+            socket.on("users", data => {
+                console.log("user list login: " + data );
+                setUser(data)
                 setIsLogged(true);
             });
         }
@@ -40,25 +45,31 @@ function App() {
         setUser(e.target.value);
     };
 
-    return (
 
-        <div>
-            <GlobalStyle/>
-            <LoginStyle/>
-            <div className="container" id="log-in">
-                <form className="login-form" onSubmit={onSummit} >
-                    <h1 className="login-heading">Sala de Chat Boxitas</h1>
-                    <p className="login-copy">Introduzca su nombre para unirte a la comunidad</p>
-                    <div  className="containerInput field-container -username">
-                        <input type="text" value={name} onChange={onChange} placeholder="Nombre"/>
+    if(isLogged){
+        return (<div>
+            <Chat user={loggedUser} list={user}/>
+        </div>)
+    }else {
+        return (
+            <div>
+                <GlobalStyle/>
+                <div>
+                    <LoginStyle/>
+                    <div className="container" id="log-in">
+                        <form className="login-form" onSubmit={onSummit} >
+                            <h1 className="login-heading">Sala de Chat Boxitas</h1>
+                            <p className="login-copy">Introduzca su nombre para unirte a la comunidad</p>
+                            <div  className="containerInput field-container -username">
+                                <input type="text" value={name} onChange={onChange} placeholder="Nombre"/>
+                            </div>
+                            <button className="log-in-button" type="submit">Entrar</button>
+                        </form>
                     </div>
-                    <button className="log-in-button" type="submit">Entrar</button>
-                </form>
+                </div>
             </div>
-        </div>
-
-
-    );
+        )
+    }
 }
 
 export default App;

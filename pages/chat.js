@@ -1,26 +1,28 @@
 import React, {useState, useEffect} from "react";
 import socketIOClient from "socket.io-client";
-import styled from "styled-components";
-import {useRouter} from 'next/router'
 import {ChatStyle, GlobalStyle} from "../components/styled/GlobalStyle";
 
 
+const ENDPOINT = "http://127.0.0.1:4001";
+const socket = socketIOClient(ENDPOINT);
+
 function Chat(props) {
-    const router = useRouter();
+    console.log("chat lista pasada por props: "+props.list);
     const [user, setUser] = useState({
-        usersList: []
+        usersList: JSON.parse(props.list)
     });
     const [msg, setMsg] = useState("");
     const [recMsg, setRecMsg] = useState({
         listMsg: []
     });
     const [loggedUser, setLoggedUser] = useState(props.user);
-
+    const [search,setSearch] =useState("");
     useEffect(() => {
         // list of connected users
+        console.log("useEffect");
         socket.on("users", data => {
             setUser({usersList: JSON.parse(data)})
-            console.log("user list: " + JSON.parse(data));
+            console.log("user list: " + user.usersList);
         });
         // we get the messages
         socket.on("getMsg", data => {
@@ -38,79 +40,78 @@ function Chat(props) {
     };
 
     // to send a message
-    const sendMessage = () => {
-        console.log("loggedUser: " + loggedUser);
+    const sendMessage = e => {
+        if(e.keyCode===13&& !e.shiftKey){
+            console.log("loggedUser: " + loggedUser);
             socket.emit("sendMsg", JSON.stringify({id: loggedUser.id, msg: msg}));
             setMsg("");
+        }
+
 
     };
 
+    const onChageBuscar=e=>{
+        setSearch(e.target.value);
+    };
     return (
         <div>
             <GlobalStyle/>
-           <ChatStyle/>
-            <div className="ui">
-                <div className="left-menu">
-                    <h3 >Usuarios</h3>
-                    <menu className="list-friends">
-                        {user.usersList.map((user,index) => {
+            <ChatStyle/>
+            <div className="container clearfix">
+                <div className="people-list" id="people-list">
+                    <div className="search">
+                        <input type="text" value={search} onChange={onChageBuscar} placeholder="buscar"/>
+                    </div>
+                    <ul className="list">
+                        {user.usersList.filter(user => user.userName.includes(search)).map((user,index)=>{
+                          return ( <li key={index} className="clearfix">
 
-                                    if(msg.userName===loggedUser.userName){
-                                       return (<li className="friend-with-a-SVAGina" key={index} >
-                                            <img width="50" height="50"
-                                                 src="http://cs625730.vk.me/v625730358/1126a/qEjM1AnybRA.jpg"/>
-                                            <div className="info">
-                                                <div className="user">{user.userName}</div>
-                                                <div className="status on"> online</div>
-                                            </div>
-                                        </li> )
-                                    }else {
-                                return   (     <li key={index}>
-                                            <img width="50" height="50"
-                                                 src="http://cs625730.vk.me/v625730358/1126a/qEjM1AnybRA.jpg"/>
-                                            <div className="info">
-                                                <div className="user">{user.userName}</div>
-                                                <div className="status on"> online</div>
-                                            </div>
-                                        </li>)
-                                    }
-
-                            })
-                        }
-                    </menu>
+                                <div className="about">
+                                    <div className="name">{user.userName}</div>
+                                </div>
+                            </li>)
+                        })}
+                    </ul>
                 </div>
                 <div className="chat">
-                    <div className="top">
-                        <div className="avatar">
-                            <img width="50" height="50" src="http://cs625730.vk.me/v625730358/1126a/qEjM1AnybRA.jpg"/>
+                    <div className="chat-header clearfix">
+                        <div className="chat-about">
+                            <div className="chat-with">{loggedUser.userName}</div>
                         </div>
-                        <div className="info">
-                            <div className="name">{loggedUser.userName}</div>
-                        </div>
-                        <i className="fa fa-star"/>
+
                     </div>
-                    <ul className="messages">
-                        {
-                            recMsg.listMsg.map((message,index)=>{
-                                return(
-                                    <li className="i">
-                                        <div className="head">
-                                            <span className="time">{message.time}</span>
-                                            <span className="name">{message.userName}</span>
-                                        </div>
-                                        <div className="message">{message.msg}</div>
-                                    </li>
-                                );
-                            })
-                        }
+                    <div className="chat-history">
+                        <ul>
+                            {recMsg.listMsg.map((msg,index)=>{
+                                if(msg.userName===loggedUser.userName){
+                                    return (
+                                        <li className="clearfix">
+                                            <div className="message-data align-right">
+                                                <span className="message-data-time">{msg.time}</span> &nbsp; &nbsp;
+                                                <span className="message-data-name">{msg.userName}</span>
 
+                                            </div>
+                                            <div className="message other-message float-right">
+                                                {msg.msg}
+                                            </div>
+                                        </li>
+                                    )
+                                }
+                                return ( <li>
+                                    <div className="message-data">
+                                        <span className="message-data-name">{msg.userName}</span>
+                                        <span className="message-data-time">{msg.time}</span>
+                                    </div>
+                                    <div className="message my-message">
+                                        {msg.msg}
+                                    </div>
+                                </li>)
+                            })}
+                        </ul>
 
-                    </ul>
-                    <div className="write-form">
-                        <textarea placeholder="Escriba su mensaje" value={msg} onChange={onChangeState}  name="e" id="texxt" rows="2"/>
-                        <i className="fa fa-picture-o"/>
-                        <i className="fa fa-file-o"/>
-                        <span className="send" onClick={sendMessage}>Send</span>
+                    </div>
+                    <div className="chat-message clearfix">
+                        <textarea name="message-to-send" value={msg}  onKeyUp={sendMessage} onChange={onChangeState} id="message-to-send" placeholder="Type your message" rows="3"/>
                     </div>
                 </div>
             </div>
