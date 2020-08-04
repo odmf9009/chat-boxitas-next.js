@@ -1,17 +1,14 @@
 import React, {useState, useEffect} from "react";
 import socketIOClient from "socket.io-client";
-import MessageText from "../components/message_text";
 import styled from "styled-components";
-import {BodyChat,InputChat,BotonChat} from "../components/chat_components";
-import HeadChat from "../components/head_chat";
+import {useRouter} from 'next/router'
+import {ChatStyle, GlobalStyle} from "../components/styled/GlobalStyle";
 
-const ENDPOINT = "http://127.0.0.1:4001";
-const socket = socketIOClient(ENDPOINT);
 
 function Chat(props) {
-
+    const router = useRouter();
     const [user, setUser] = useState({
-        usersList: null
+        usersList: []
     });
     const [msg, setMsg] = useState("");
     const [recMsg, setRecMsg] = useState({
@@ -35,54 +32,89 @@ function Chat(props) {
     }, []);
 
     const onChangeState = e => {
+        e.preventDefault();
         console.log(e.target.value);
         setMsg(e.target.value);
     };
 
     // to send a message
     const sendMessage = () => {
-        console.log("loggedUser" + loggedUser);
-        if (loggedUser.length === 0) {
-            alert('Debe introducir su nombre para poder mandar mensajes');
-        } else {
+        console.log("loggedUser: " + loggedUser);
             socket.emit("sendMsg", JSON.stringify({id: loggedUser.id, msg: msg}));
             setMsg("");
-        }
 
     };
-    // get the logged user
-    socket.on("connecteduser", data => {
-        setLoggedUser(JSON.parse(data));
-    });
-    const Ol = styled.ol`
-    list-style: none;
-    background: none;
-    margin: 0;
-    padding: 0 0 50px 0;
-    margin-top: 60px;
-    margin-bottom: 10px;
-    
-    `;
+
     return (
+        <div>
+            <GlobalStyle/>
+           <ChatStyle/>
+            <div className="ui">
+                <div className="left-menu">
+                    <h3 >Usuarios</h3>
+                    <menu className="list-friends">
+                        {user.usersList.map((user,index) => {
 
-        <BodyChat>
+                                    if(msg.userName===loggedUser.userName){
+                                       return (<li className="friend-with-a-SVAGina" key={index} >
+                                            <img width="50" height="50"
+                                                 src="http://cs625730.vk.me/v625730358/1126a/qEjM1AnybRA.jpg"/>
+                                            <div className="info">
+                                                <div className="user">{user.userName}</div>
+                                                <div className="status on"> online</div>
+                                            </div>
+                                        </li> )
+                                    }else {
+                                return   (     <li key={index}>
+                                            <img width="50" height="50"
+                                                 src="http://cs625730.vk.me/v625730358/1126a/qEjM1AnybRA.jpg"/>
+                                            <div className="info">
+                                                <div className="user">{user.userName}</div>
+                                                <div className="status on"> online</div>
+                                            </div>
+                                        </li>)
+                                    }
 
-            <HeadChat name={loggedUser?.userName}></HeadChat>
-            <Ol>
-                {recMsg.listMsg?.map((msgInfo, index) => {
-                    return (<MessageText name={msgInfo.userName} message={msgInfo.msg} time={msgInfo.time}/>);
-                })}
-            </Ol>
-            <InputChat
-                placeholder="Escriba un mensaje"
-                value={msg}
-                onChange={onChangeState}/>
-            <BotonChat onClick={() => {
-                sendMessage()
-            }}/>
+                            })
+                        }
+                    </menu>
+                </div>
+                <div className="chat">
+                    <div className="top">
+                        <div className="avatar">
+                            <img width="50" height="50" src="http://cs625730.vk.me/v625730358/1126a/qEjM1AnybRA.jpg"/>
+                        </div>
+                        <div className="info">
+                            <div className="name">{loggedUser.userName}</div>
+                        </div>
+                        <i className="fa fa-star"/>
+                    </div>
+                    <ul className="messages">
+                        {
+                            recMsg.listMsg.map((message,index)=>{
+                                return(
+                                    <li className="i">
+                                        <div className="head">
+                                            <span className="time">{message.time}</span>
+                                            <span className="name">{message.userName}</span>
+                                        </div>
+                                        <div className="message">{message.msg}</div>
+                                    </li>
+                                );
+                            })
+                        }
 
-        </BodyChat>
 
+                    </ul>
+                    <div className="write-form">
+                        <textarea placeholder="Escriba su mensaje" value={msg} onChange={onChangeState}  name="e" id="texxt" rows="2"/>
+                        <i className="fa fa-picture-o"/>
+                        <i className="fa fa-file-o"/>
+                        <span className="send" onClick={sendMessage}>Send</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
 
